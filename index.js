@@ -1,73 +1,48 @@
 const dbClient = require("./connection/connection");
-const app = require("./server/server") 
+const app = require("./server/server");
+const bodyParser = require('body-parser');
 
-dbClient.connect();
+app.use(bodyParser.json());
 
-const bodyParser = require('body-parser')
-app.app.use(bodyParser.json());
+app.get('/test', (req, res) => {
+    res.send("Hello");
+});
 
+app.post('/test', (req, res) => {
+    const { num1, num2 } = req.body;
+    const sum = num1 + num2;
+    res.send("Total Sum is: " + sum);
+});
 
-app.app.get('/test' , function(req , res) { 
+app.post("/products", async (req, res) => {
+    const { productName, quantity, price } = req.body;
 
-    res.send("Hello")
-})
-
-app.app.post('/test' , function(req , res) { 
-
-    const sum = req.body.num1 + req.body.num2;
-    res.send(" Total Sum is -: " + sum);
-})
-
-
-app.app.post("/gmp/Message", async (req, res) => {
-   // console.log("🚀 ~ file: message.js:19 ~ app.app.post ~ res:", res);
-    console.log("message id ", req.body);
-    const {
-        productName,
-        quantity,
-        price,
-   
-    } = req.body;
     try {
-      const _query = await dbClient.query(
-        `INSERT INTO products (productName,quantity, price) VALUES ($1, $2, $3) RETURNING productId`,
-        [
-            productName,
-            quantity,
-            price,
-         
-        ]
-      );
-      console.log("fullresponse id aa gyi hai---->", _query);
-      res.status(201).send({
-        message: "Message added successfully!",
-        row_id: _query.rows[0].id,
-      });
-    } catch (error) {
-      console.error("Error", error);
-      res.status(500).send({
-        message: "L44 something went wrong",
-      });
-    }
-  });
+        const _query = await dbClient.query(
+            `INSERT INTO products (productName, quantity, price) VALUES ($1, $2, $3) RETURNING productId`,
+            [productName, quantity, price]
+        );
 
-  app.app.get("/gmp/Message", (req, res) => {
-    console.log("ht");
-    try {
-        dbClient.query(
-        `SELECT * FROM products`,
-        (err, result) => {
-          if (!err) {
-            let _pa = JSON.stringify(result.rows);
-            let _str = JSON.parse(_pa);
-            res.status(200).json({ data: _str });
-            console.log("🚀 ~ file: message.js:50 ~ client.query ~ _str:", _str);
-          }
-          console.log("🚀 ~ file: message.js:64 ~ gmpdbclient.query ~ err:", err);
-        }
-      );
+        res.status(201).send({
+            message: "Message added successfully!",
+            row_id: _query.rows[0].productId,
+        });
     } catch (error) {
-      console.log("🚀 ~ file: message.js:70 ~ app.app.get ~ error:", error);
-      console.log(error);
+        console.error("Error", error);
+        res.status(500).send({
+            message: "Something went wrong",
+        });
     }
-  });
+});
+
+app.get("/products", async (req, res) => {
+    try {
+        const result = await dbClient.query('SELECT * FROM products');
+        res.status(200).json({ data: result.rows });
+    } catch (error) {
+        console.error("Error", error);
+        res.status(500).send({
+            message: "Something went wrong",
+        });
+    }
+});

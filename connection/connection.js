@@ -1,13 +1,15 @@
 const { Client } = require("pg");
 
-
-
 const dbClient = new Client({
     host: "localhost",
     user: "postgres",
     port: 5432,
     password: "Bhopal@06",
     database: "test1"
-  
- });
- module.exports =  dbClient;
+});
+
+dbClient.connect()
+    .then(() => console.log('Database connected successfully'))
+    .catch(err => console.error('Database connection error', err.stack));
+
+module.exports = dbClient;

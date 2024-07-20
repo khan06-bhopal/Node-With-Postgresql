@@ -1,18 +1,13 @@
-
-const express = require('express')
+const express = require('express');
 const app = express();
-
 const port = 8080;
 
-app.listen(port , function(err) { 
-
-    if(err){ 
-        console.log(" Error while Starting server!")
+app.listen(port, (err) => {
+    if (err) {
+        console.log("Error while starting server!");
+    } else {
+        console.log("Server has been started at port " + port);
     }
-    else{ 
-        console.log(" Server has been started at " + port)
+});
 
-    }
-})
-
-module.exports = {app}
+module.exports = app;
